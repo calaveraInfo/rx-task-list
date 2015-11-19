@@ -17,3 +17,6 @@ mvn package
 
 ##Running
 java -jar target/rx-task-list-1.0.0-SNAPSHOT.jar
+
+##Using
+http://localhost:8080/
