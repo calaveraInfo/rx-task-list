@@ -32,7 +32,7 @@ public class Application {
     @PostConstruct
     public void init() {
         LOG.info("Initializing database with random testing data.");
-        TaskList taskList = new TaskList();
+        TaskList taskList = new TaskList("Some tasklist");
         taskList.setTasks(new ArrayList<Task>());
         for (int i = 0; i < 10; i++) {
         	Task task = new Task("Some task " + i);

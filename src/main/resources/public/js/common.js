@@ -1,6 +1,11 @@
 window.common = window.common || {};
 
 (function (ns) {
+	ns.api = "/api/";
+	ns.taskListParamName = "taskList";
+	ns.getURLParameter = function(name) {
+	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+	};
 	ns.Menu = React.createClass({
 		render: function() {
 			return (
