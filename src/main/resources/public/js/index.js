@@ -6,6 +6,16 @@ taskListsModel.lists = Rx.Observable.just(common.api)
 	.map(apiTaskList => apiTaskList._embedded.taskLists);
 	//.subscribe(value => {console.log(value)});
 
+var NewTaskList = React.createClass({
+	render: function() {
+		return (
+			<form>
+				<input type="text" /><input type="submit" />
+			</form>
+		);
+	}
+});
+
 var TaskLists = React.createClass({
 	getInitialState: function() {
 		return {
@@ -14,13 +24,11 @@ var TaskLists = React.createClass({
 	},
 	render: function() {
 		return (
-			<ul>
-				{this.state.taskLists.map(taskList => 
-					<li key={taskList._links.taskList.href}>
-						<a href={"task-list.html?"+common.taskListParamName+"="+taskList._links.taskList.href}>{taskList.title}</a>
-					</li>
-				)}
-			</ul>
+			<ul>{this.state.taskLists.map(taskList => 
+				<li key={taskList._links.taskList.href}>
+					<a href={"task-list.html?"+common.taskListParamName+"="+taskList._links.taskList.href}>{taskList.title}</a>
+				</li>
+			)}</ul>
 		);
 	}
 });
@@ -33,6 +41,7 @@ var TaskListsPage = React.createClass({
 		return (
 			<div>
 				<common.Menu />
+				<NewTaskList />
 				<TaskLists ref={taskLists => this.taskListsComponent = taskLists}/>
 			</div>
 		);
