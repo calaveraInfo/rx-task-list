@@ -1,16 +1,32 @@
 var taskListsModel = {};
-taskListsModel.lists = Rx.Observable.just(common.api)
+taskListsModel.newTaskList = {};
+taskListsModel.newTaskList.formSubmissions = new Rx.Subject();
+taskListsModel.api = Rx.Observable.just(common.api)
 	.flatMap(apiUrl => Rx.Observable.fromPromise(jQuery.get(apiUrl)))
 	.map(apiHal => apiHal._links.taskLists.href)
+	.shareReplay(1);
+
+taskListsModel.newTaskList.confirmations = taskListsModel.newTaskList.formSubmissions
+	.withLatestFrom(taskListsModel.api, (entity, url) => ({entity: entity, url: url}))
+	.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity)));
+
+taskListsModel.lists = taskListsModel.api
+	.combineLatest(taskListsModel.newTaskList.confirmations.startWith(true), url => url)
 	.flatMap(url => Rx.Observable.fromPromise(jQuery.get(url)))
 	.map(apiTaskList => apiTaskList._embedded.taskLists);
 	//.subscribe(value => {console.log(value)});
 
+
 var NewTaskList = React.createClass({
+	onSubmit: function(event) {
+		event.preventDefault();
+		this.props.model.formSubmissions.onNext({title: this.title});
+	},
 	render: function() {
 		return (
-			<form>
-				<input type="text" /><input type="submit" />
+			<form onSubmit={this.onSubmit}>
+				<input type="text" onChange={event => this.title = event.target.value} />
+				<input type="submit" />
 			</form>
 		);
 	}
@@ -41,8 +57,8 @@ var TaskListsPage = React.createClass({
 		return (
 			<div>
 				<common.Menu />
-				<NewTaskList />
-				<TaskLists ref={taskLists => this.taskListsComponent = taskLists}/>
+				<NewTaskList model={this.props.model.newTaskList} />
+				<TaskLists ref={taskLists => this.taskListsComponent = taskLists} />
 			</div>
 		);
 	}

@@ -10,7 +10,7 @@ var TaskList = React.createClass({
 		return {data: {
 			taskList: {title: ""},
 			tasks: []
-		}}};
+		}};
 	},
 	render: function() {
 		return (

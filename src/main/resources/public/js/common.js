@@ -3,6 +3,14 @@ window.common = window.common || {};
 (function (ns) {
 	ns.api = "/api/";
 	ns.taskListParamName = "taskList";
+	ns.doPost = function (url, data) {
+		return jQuery.ajax({
+			type: "POST",
+			url: url,
+			data: JSON.stringify(data),
+			contentType: 'application/json'
+		});
+	};
 	ns.getURLParameter = function(name) {
 	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 	};
