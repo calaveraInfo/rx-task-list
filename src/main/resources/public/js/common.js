@@ -32,7 +32,7 @@ window.common = window.common || {};
 						<div id="navbar" className="collapse navbar-collapse">
 							<ul className="nav navbar-nav">
 								<li className="active">
-									<a href="#" key="home">
+									<a href="http://localhost:8080/">
 										Home
 									</a>
 								</li>

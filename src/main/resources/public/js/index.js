@@ -11,7 +11,7 @@ taskListsModel.newTaskList.confirmations = taskListsModel.newTaskList.formSubmis
 	.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity)));
 
 taskListsModel.lists = taskListsModel.api
-	.combineLatest(taskListsModel.newTaskList.confirmations.startWith(true), url => url)
+	.combineLatest(taskListsModel.newTaskList.confirmations.startWith("whatever"), url => url)
 	.flatMap(url => Rx.Observable.fromPromise(jQuery.get(url)))
 	.map(apiTaskList => apiTaskList._embedded.taskLists);
 	//.subscribe(value => {console.log(value)});
@@ -26,7 +26,7 @@ var NewTaskList = React.createClass({
 		return (
 			<form onSubmit={this.onSubmit}>
 				<input type="text" onChange={event => this.title = event.target.value} />
-				<input type="submit" />
+				<input type="submit" value="Create new task list"/>
 			</form>
 		);
 	}

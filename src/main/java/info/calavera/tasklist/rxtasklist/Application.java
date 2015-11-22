@@ -33,9 +33,11 @@ public class Application {
     public void init() {
         LOG.info("Initializing database with random testing data.");
         TaskList taskList = new TaskList("Some tasklist");
+        taskLists.save(taskList);
         taskList.setTasks(new ArrayList<Task>());
         for (int i = 0; i < 10; i++) {
         	Task task = new Task("Some task " + i);
+        	task.setTaskList(taskList);
         	tasks.save(task);
         	taskList.getTasks().add(task);
         }

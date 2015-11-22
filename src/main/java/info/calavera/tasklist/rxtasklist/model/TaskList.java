@@ -12,7 +12,7 @@ import javax.persistence.OneToMany;
 public class TaskList {
 	private @GeneratedValue @Id Long id;
 	private @Column String title;
-	private @OneToMany List<Task> tasks;
+	private @OneToMany(mappedBy="taskList") List<Task> tasks;
 	
 	public TaskList() {
 		// noop
