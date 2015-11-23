@@ -4,8 +4,9 @@ taskListModel.newTask.formSubmissions = new Rx.Subject();
 taskListModel.task = {};
 taskListModel.task.updates = new Rx.Subject();
 
-taskListModel.task.confirmations = taskListModel.task.updates
-	.flatMap(taskUpdate => Rx.Observable.fromPromise(common.doPut(taskUpdate.url, taskUpdate.entity)));
+taskListModel.task.updateConfirmations = taskListModel.task.updates
+	.flatMap(taskUpdate => Rx.Observable.fromPromise(
+		taskUpdate.isDelete ? common.doDelete(taskUpdate.url) : common.doPut(taskUpdate.url, taskUpdate.entity)));
 
 taskListModel.newTask.confirmations = taskListModel.newTask.formSubmissions
 	.withLatestFrom(
@@ -18,7 +19,7 @@ taskListModel.newTask.confirmations = taskListModel.newTask.formSubmissions
 taskListModel.taskList = Rx.Observable.just(common.getURLParameter(common.taskListParamName))
 	.combineLatest(
 		taskListModel.newTask.confirmations.startWith("whatever"),
-		taskListModel.task.confirmations.startWith("whatever"),
+		taskListModel.task.updateConfirmations.startWith("whatever"),
 		url => url)
 	.flatMap(taskListUri => Rx.Observable.fromPromise(jQuery.get(taskListUri)))
 	.flatMap(taskList => Rx.Observable.fromPromise(jQuery.get(taskList._links.tasks.href)),
@@ -42,11 +43,12 @@ var Task = React.createClass({
 			description: this.props.data.description
 		};
 	},
-	onSave: function() {
+	onSave: function(isDelete) {
 		this.setState({editable: false});
 		this.props.onSubmit({
 			entity: {description: this.state.description},
-			url: this.props.data._links.self.href
+			url: this.props.data._links.self.href,
+			isDelete: isDelete
 		});
 	},
 	renderReadOnly: function() {
@@ -58,7 +60,8 @@ var Task = React.createClass({
 		return (
 			<span>
 				<input value={this.state.description} onChange={e => this.setState({description: e.target.value})} type="text" />
-				<input value="Save" onClick={this.onSave} type="button" />
+				<input value="Save" onClick={() => {this.onSave(false);}} type="button" />
+				<input value="Delete" onClick={() => {this.onSave(true);}} type="button" />
 				<input value="Cancel" onClick={() => {this.setState(this.getInitialState());}} type="button" />
 			</span>
 		);
@@ -98,6 +101,9 @@ var TaskListController = React.createClass({
 		this.props.model.newTask.formSubmissions.onNext(task);
 	},
 	updateTask: function(task) {
+		this.props.model.task.updates.onNext(task);
+	},
+	deleteTask: function(task) {
 		this.props.model.task.updates.onNext(task);
 	},
 	render: function() {

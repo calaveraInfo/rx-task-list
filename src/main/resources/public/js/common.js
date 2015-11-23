@@ -19,6 +19,12 @@ window.common = window.common || {};
 			contentType: 'application/json'
 		});
 	};
+	ns.doDelete = function (url) {
+		return jQuery.ajax({
+			type: "DELETE",
+			url: url
+		});
+	};
 	ns.getURLParameter = function(name) {
 	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 	};
