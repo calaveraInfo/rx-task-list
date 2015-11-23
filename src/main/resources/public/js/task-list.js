@@ -58,12 +58,12 @@ var Task = React.createClass({
 	},
 	renderEditable: function() {
 		return (
-			<span>
+			<form onSubmit={e => {e.preventDefault(); this.onSave(false);}}>
 				<input value={this.state.description} onChange={e => this.setState({description: e.target.value})} type="text" />
-				<input value="Save" onClick={() => {this.onSave(false);}} type="button" />
+				<input value="Save" type="submit" />
 				<input value="Delete" onClick={() => {this.onSave(true);}} type="button" />
 				<input value="Cancel" onClick={() => {this.setState(this.getInitialState());}} type="button" />
-			</span>
+			</form>
 		);
 	},
 	render: function() {
@@ -101,9 +101,6 @@ var TaskListController = React.createClass({
 		this.props.model.newTask.formSubmissions.onNext(task);
 	},
 	updateTask: function(task) {
-		this.props.model.task.updates.onNext(task);
-	},
-	deleteTask: function(task) {
 		this.props.model.task.updates.onNext(task);
 	},
 	render: function() {
