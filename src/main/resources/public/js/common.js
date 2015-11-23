@@ -11,6 +11,14 @@ window.common = window.common || {};
 			contentType: 'application/json'
 		});
 	};
+	ns.doPut = function (url, data) {
+		return jQuery.ajax({
+			type: "PUT",
+			url: url,
+			data: JSON.stringify(data),
+			contentType: 'application/json'
+		});
+	};
 	ns.getURLParameter = function(name) {
 	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 	};

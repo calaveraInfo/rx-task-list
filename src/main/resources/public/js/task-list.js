@@ -1,7 +1,11 @@
 var taskListModel = {};
 taskListModel.newTask = {};
 taskListModel.newTask.formSubmissions = new Rx.Subject();
-taskListModel.task = new Rx.Subject();
+taskListModel.task = {};
+taskListModel.task.updates = new Rx.Subject();
+
+taskListModel.task.confirmations = taskListModel.task.updates
+	.flatMap(taskUpdate => Rx.Observable.fromPromise(common.doPut(taskUpdate.url, taskUpdate.entity)));
 
 taskListModel.newTask.confirmations = taskListModel.newTask.formSubmissions
 	.withLatestFrom(
@@ -12,7 +16,10 @@ taskListModel.newTask.confirmations = taskListModel.newTask.formSubmissions
 	.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity)));
 
 taskListModel.taskList = Rx.Observable.just(common.getURLParameter(common.taskListParamName))
-	.combineLatest(taskListModel.newTask.confirmations.startWith("whatever"), url => url)
+	.combineLatest(
+		taskListModel.newTask.confirmations.startWith("whatever"),
+		taskListModel.task.confirmations.startWith("whatever"),
+		url => url)
 	.flatMap(taskListUri => Rx.Observable.fromPromise(jQuery.get(taskListUri)))
 	.flatMap(taskList => Rx.Observable.fromPromise(jQuery.get(taskList._links.tasks.href)),
 		(taskList, tasks) => ({taskList: taskList, tasks: tasks._embedded.tasks}))
@@ -36,7 +43,11 @@ var Task = React.createClass({
 		};
 	},
 	onSave: function() {
-		this.props.onSubmit({description: this.state.description});
+		this.setState({editable: false});
+		this.props.onSubmit({
+			entity: {description: this.state.description},
+			url: this.props.data._links.self.href
+		});
 	},
 	renderReadOnly: function() {
 		return (
@@ -69,7 +80,7 @@ var TaskList = React.createClass({
 			<div>
 				<h1>{this.state.taskList.title}</h1>
 				<ul>{this.state.tasks.map(task =>
-					<li>
+					<li key={task._links.self.href}>
 						<Task data={task} onSubmit={this.props.onSubmit} />
 					</li>
 				)}</ul>
@@ -87,7 +98,7 @@ var TaskListController = React.createClass({
 		this.props.model.newTask.formSubmissions.onNext(task);
 	},
 	updateTask: function(task) {
-		console.log(task);
+		this.props.model.task.updates.onNext(task);
 	},
 	render: function() {
 		return (
