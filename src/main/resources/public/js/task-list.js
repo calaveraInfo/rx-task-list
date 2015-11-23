@@ -40,20 +40,27 @@ var Task = React.createClass({
 	getInitialState: function() {
 		return {
 			editable: false,
-			description: this.props.data.description
+			description: this.props.data.description,
+			completed: this.props.data.completed
 		};
 	},
 	onSave: function(isDelete) {
 		this.setState({editable: false});
 		this.props.onSubmit({
-			entity: {description: this.state.description},
+			entity: {
+				description: this.state.description,
+				completed: this.state.completed
+			},
 			url: this.props.data._links.self.href,
 			isDelete: isDelete
 		});
 	},
 	renderReadOnly: function() {
 		return (
-			<span onClick={() => {this.setState({editable: true});}}>{this.props.data.description}</span>
+			<form>
+				<input checked={this.state.completed} onChange={e => {this.setState({completed: e.target.value}); this.onSave(false)}} type="checkbox" />
+				<span onClick={() => {this.setState({editable: true});}}>{this.props.data.description}</span>
+			</form>
 		);
 	},
 	renderEditable: function() {

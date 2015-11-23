@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 public class Task {
     private @GeneratedValue @Id Long id;
     private @Column String description;
+    private @Column boolean completed;
     private @ManyToOne TaskList taskList;
 
     public Task() {
@@ -41,6 +42,14 @@ public class Task {
 
 		public void setTaskList(TaskList taskList) {
 			this.taskList = taskList;
+		}
+
+		public boolean getCompleted() {
+			return completed;
+		}
+
+		public void setCompleted(boolean completed) {
+			this.completed = completed;
 		}
 
 }
