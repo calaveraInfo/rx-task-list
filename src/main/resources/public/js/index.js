@@ -14,18 +14,12 @@ taskListsModel.lists = taskListsModel.api
 	.combineLatest(taskListsModel.newTaskList.confirmations.startWith("whatever"), url => url)
 	.flatMap(url => Rx.Observable.fromPromise(jQuery.get(url)))
 	.map(apiTaskList => apiTaskList._embedded.taskLists);
-	//.subscribe(value => {console.log(value)});
-
 
 var NewTaskList = React.createClass({
-	onSubmit: function(event) {
-		event.preventDefault();
-		this.props.model.formSubmissions.onNext({title: this.title});
-	},
 	render: function() {
 		return (
-			<form onSubmit={this.onSubmit}>
-				<input type="text" onChange={event => this.title = event.target.value} />
+			<form onSubmit={e => {e.preventDefault(); this.props.onSubmit({title: this.title});}}>
+				<input type="text" onChange={e => {this.title = e.target.value}} />
 				<input type="submit" value="Create new task list"/>
 			</form>
 		);
@@ -34,9 +28,7 @@ var NewTaskList = React.createClass({
 
 var TaskLists = React.createClass({
 	getInitialState: function() {
-		return {
-			taskLists: []
-		};
+		return {taskLists: []};
 	},
 	render: function() {
 		return (
@@ -49,7 +41,7 @@ var TaskLists = React.createClass({
 	}
 });
 
-var TaskListsPage = React.createClass({
+var TaskListsController = React.createClass({
 	componentWillMount: function() {
 		this.props.model.lists.subscribeOnNext(taskLists => {this.taskListsComponent.setState({taskLists: taskLists})});
 	},
@@ -57,14 +49,14 @@ var TaskListsPage = React.createClass({
 		return (
 			<div>
 				<common.Menu />
-				<NewTaskList model={this.props.model.newTaskList} />
-				<TaskLists ref={taskLists => this.taskListsComponent = taskLists} />
+				<NewTaskList onSubmit={taskList => {this.props.model.newTaskList.formSubmissions.onNext(taskList)}} />
+				<TaskLists ref={taskLists => {this.taskListsComponent = taskLists;}} />
 			</div>
 		);
 	}
 });
  
 React.render(
-	<TaskListsPage model={taskListsModel} />,
+	<TaskListsController model={taskListsModel} />,
 	document.body
 );
