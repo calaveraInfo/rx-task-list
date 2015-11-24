@@ -47,13 +47,20 @@ var Task = React.createClass({
 			completed: this.props.data.completed
 		};
 	},
+	onToggleCompleted(e) {
+		this.setState({completed: e.target.checked});
+		this.update(e.target.checked);
+	},
+	update(completed) {
+		this.props.onSubmit({
+			description: this.state.description,
+			completed: completed
+		}, this.props.data._links.self.href);
+	},
 	onSave: function(e) {
 		e.preventDefault();
 		this.setState({editable: false});
-		this.props.onSubmit({
-			description: this.state.description,
-			completed: this.state.completed
-		}, this.props.data._links.self.href);
+		this.update(this.state.completed);
 	},
 	onDelete: function(e) {
 		this.props.onDelete(this.props.data._links.self.href);
@@ -65,7 +72,7 @@ var Task = React.createClass({
 	renderReadOnly: function() {
 		return (
 			<form>
-				<input checked={this.state.completed} onChange={e => {this.setState({completed: e.target.value}); this.onSave(e);}} type="checkbox" />
+				<input checked={this.state.completed} onChange={this.onToggleCompleted} type="checkbox" />
 				<span onClick={this.enableEdit}>{this.props.data.description}</span>
 			</form>
 		);
@@ -73,7 +80,7 @@ var Task = React.createClass({
 	renderEditable: function() {
 		return (
 			<form onSubmit={this.onSave}>
-				<input value={this.state.description} onChange={e => this.setState({description: e.target.value})} type="text" />
+				<input value={this.state.description} onChange={e => {this.setState({description: e.target.value});}} type="text" />
 				<input value="Save" type="submit" />
 				<input value="Delete" onClick={this.onDelete} type="button" />
 				<input value="Cancel" onClick={this.disableEdit} type="button" />
