@@ -49,7 +49,7 @@ var TaskListsController = React.createClass({
 		return (
 			<div>
 				<common.Menu />
-				<NewTaskList onSubmit={taskList => {this.props.model.newTaskList.formSubmissions.onNext(taskList)}} />
+				<NewTaskList onSubmit={taskList => {this.props.model.newTaskList.formSubmissions.onNext(taskList);}} />
 				<TaskLists ref={taskLists => {this.taskListsComponent = taskLists;}} />
 			</div>
 		);

@@ -26,7 +26,8 @@ taskListModel.taskList = Rx.Observable.just(common.getURLParameter(common.taskLi
 		url => url)
 	.flatMap(taskListUri => Rx.Observable.fromPromise(jQuery.get(taskListUri)))
 	.flatMap(taskList => Rx.Observable.fromPromise(jQuery.get(taskList._links.tasks.href)),
-		(taskList, tasks) => ({taskList: taskList, tasks: tasks._embedded.tasks}))
+		(taskList, tasks) => ({taskList: taskList, tasks: tasks._embedded.tasks.sort(
+			(t1, t2) => t1.description.localeCompare(t2.description))}));
 
 var NewTask = React.createClass({
 	render: function() {
