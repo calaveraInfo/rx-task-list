@@ -11,6 +11,7 @@ public class Task {
     private @GeneratedValue @Id Long id;
     private @Column String description;
     private @Column boolean completed;
+    private @Column Priority priority = Priority.MEDIUM;
     private @ManyToOne TaskList taskList;
 
     public Task() {
@@ -50,6 +51,14 @@ public class Task {
 
 		public void setCompleted(boolean completed) {
 			this.completed = completed;
+		}
+
+		public Priority getPriority() {
+			return priority;
+		}
+
+		public void setPriority(Priority priority) {
+			this.priority = priority;
 		}
 
 }

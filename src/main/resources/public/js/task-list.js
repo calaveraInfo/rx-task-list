@@ -44,23 +44,29 @@ var Task = React.createClass({
 		return {
 			editable: false,
 			description: this.props.data.description,
-			completed: this.props.data.completed
+			completed: this.props.data.completed,
+			priority: this.props.data.priority
 		};
 	},
-	onToggleCompleted(e) {
+	onToggleCompleted: function (e) {
 		this.setState({completed: e.target.checked});
-		this.update(e.target.checked);
+		this.update(e.target.checked, this.state.priority);
 	},
-	update(completed) {
+	onPriorityChange: function (e) {
+		this.setState({priority: e.target.value});
+		this.update(this.state.completed, e.target.value);
+	},
+	update: function (completed, priority) {
 		this.props.onSubmit({
 			description: this.state.description,
-			completed: completed
+			completed: completed,
+			priority: priority
 		}, this.props.data._links.self.href);
 	},
 	onSave: function(e) {
 		e.preventDefault();
 		this.setState({editable: false});
-		this.update(this.state.completed);
+		this.update(this.state.completed, this.state.priority);
 	},
 	onDelete: function(e) {
 		this.props.onDelete(this.props.data._links.self.href);
@@ -73,6 +79,11 @@ var Task = React.createClass({
 		return (
 			<form>
 				<input checked={this.state.completed} onChange={this.onToggleCompleted} type="checkbox" />
+				<select value={this.state.priority} onChange={this.onPriorityChange}>
+					<option value="HIGH">High</option>
+					<option value="MEDIUM">Medium</option>
+					<option value="LOW">Low</option>
+				</select>
 				<span onClick={this.enableEdit}>{this.props.data.description}</span>
 			</form>
 		);
