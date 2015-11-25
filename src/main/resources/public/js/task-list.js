@@ -5,14 +5,7 @@ taskListModel.task = {};
 taskListModel.task.updates = new Rx.Subject();
 taskListModel.task.deletes = new Rx.Subject();
 
-taskListModel.task.updateConfirmations = Rx.Observable.merge(
-	taskListModel.task.deletes
-		.flatMap(deleteUrl => Rx.Observable.fromPromise(common.doDelete(deleteUrl))));
-
 taskListModel.taskList = Rx.Observable.just(common.getURLParameter(common.taskListParamName))
-	.combineLatest(
-		taskListModel.task.updateConfirmations.startWith("whatever"),
-		url => url)
 	.flatMap(taskListUri => Rx.Observable.fromPromise(jQuery.get(taskListUri)))
 	.flatMap(taskList => Rx.Observable.fromPromise(jQuery.get(taskList._links.tasks.href))
 		.map(tasks => tasks._embedded.tasks)
@@ -22,12 +15,18 @@ taskListModel.taskList = Rx.Observable.just(common.getURLParameter(common.taskLi
 					.flatMap(apiUrl => Rx.Observable.fromPromise(jQuery.get(apiUrl)))
 					.map(apiHal => apiHal._links.tasks.href),
 				(entity, url) => ({entity: entity, url: url}))
-			.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity))))
-		.scan((previous, current) => jQuery.isArray(current) ? current : previous.concat(current))
+			.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity)))
+			.map(newTask => ({task: newTask, isNew: true})))
 		.merge(taskListModel.task.updates
-			.flatMap(taskUpdate => Rx.Observable.fromPromise(common.doPut(taskUpdate.url, taskUpdate.entity))))
-		.scan((previous, current) => jQuery.isArray(current) ? current : jQuery.map(previous,
-			oldTask => oldTask._links.self.href == current._links.self.href ? current : oldTask)),
+			.flatMap(taskUpdate => Rx.Observable.fromPromise(common.doPut(taskUpdate.url, taskUpdate.entity)))
+			.map(updatedTask => ({task: updatedTask, isUpdated: true})))
+		.merge(taskListModel.task.deletes
+			.flatMap(deleteUrl => Rx.Observable.fromPromise(common.doDelete(deleteUrl)), deleteUrl => deleteUrl)
+			.map(deleteUrl => ({task: deleteUrl, isDeleted: true})))
+		.scan((previous, current) => jQuery.isArray(current) ? current :
+			current.isNew ? previous.concat(current.task) :
+			current.isUpdated ? previous.map(oldTask => oldTask._links.self.href == current.task._links.self.href ? current.task : oldTask) :
+			current.isDeleted ? previous.filter(task => task._links.self.href != current.task) : []),
 		(taskList, tasks) => ({taskList: taskList, tasks: tasks
 			.sort((t1, t2) => t1.description.localeCompare(t2.description))}));
 
