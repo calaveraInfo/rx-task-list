@@ -6,8 +6,6 @@ taskListModel.task.updates = new Rx.Subject();
 taskListModel.task.deletes = new Rx.Subject();
 
 taskListModel.task.updateConfirmations = Rx.Observable.merge(
-	taskListModel.task.updates
-		.flatMap(taskUpdate => Rx.Observable.fromPromise(common.doPut(taskUpdate.url, taskUpdate.entity))),
 	taskListModel.task.deletes
 		.flatMap(deleteUrl => Rx.Observable.fromPromise(common.doDelete(deleteUrl))));
 
@@ -25,7 +23,11 @@ taskListModel.taskList = Rx.Observable.just(common.getURLParameter(common.taskLi
 					.map(apiHal => apiHal._links.tasks.href),
 				(entity, url) => ({entity: entity, url: url}))
 			.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity))))
-		.scan((previous, current) => Array.isArray(current) ? current : previous.concat(current)),
+		.scan((previous, current) => jQuery.isArray(current) ? current : previous.concat(current))
+		.merge(taskListModel.task.updates
+			.flatMap(taskUpdate => Rx.Observable.fromPromise(common.doPut(taskUpdate.url, taskUpdate.entity))))
+		.scan((previous, current) => jQuery.isArray(current) ? current : jQuery.map(previous,
+			oldTask => oldTask._links.self.href == current._links.self.href ? current : oldTask)),
 		(taskList, tasks) => ({taskList: taskList, tasks: tasks
 			.sort((t1, t2) => t1.description.localeCompare(t2.description))}));
 
