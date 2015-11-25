@@ -34,8 +34,11 @@ var NewTask = React.createClass({
 	render: function() {
 		return (
 			<form onSubmit={e => {e.preventDefault(); this.props.onSubmit({description: this.description});}}>
-				<input type="text" onChange={e => {this.description = e.target.value}} />
-				<input type="submit" value="Create new task"/>
+				<div className="form-group">
+					<label htmlFor="newTaskDescription">New task description</label>
+					<input id="newTaskDescription" type="text" onChange={e => {this.description = e.target.value}} className="form-control" />
+				</div>
+				<input type="submit" value="Create new task" className="btn btn-primary"/>
 			</form>
 		);
 	}
@@ -79,25 +82,51 @@ var Task = React.createClass({
 	},
 	renderReadOnly: function() {
 		return (
-			<form>
-				<input checked={this.state.completed} onChange={this.onToggleCompleted} type="checkbox" />
-				<select value={this.state.priority} onChange={this.onPriorityChange}>
-					<option value="HIGH">High</option>
-					<option value="MEDIUM">Medium</option>
-					<option value="LOW">Low</option>
-				</select>
-				<span onClick={this.enableEdit}>{this.props.data.description}</span>
-			</form>
+			<tr>
+				<td></td>
+				<td>
+					<input checked={this.state.completed} onChange={this.onToggleCompleted} type="checkbox" />
+				</td>
+				<td>
+					<select value={this.state.priority} onChange={this.onPriorityChange}>
+						<option value="HIGH">High</option>
+						<option value="MEDIUM">Medium</option>
+						<option value="LOW">Low</option>
+					</select>
+				</td>
+				<td onClick={this.enableEdit}>
+					{this.props.data.description}
+				</td>
+			</tr>
 		);
 	},
 	renderEditable: function() {
 		return (
-			<form onSubmit={this.onSave}>
-				<input value={this.state.description} onChange={e => {this.setState({description: e.target.value});}} type="text" />
-				<input value="Save" type="submit" />
-				<input value="Delete" onClick={this.onDelete} type="button" />
-				<input value="Cancel" onClick={this.disableEdit} type="button" />
-			</form>
+			<tr>
+				<td>
+					<input value="Delete" onClick={this.onDelete} type="button" className="btn btn-danger"/>
+				</td>
+				<td>
+					<input checked={this.state.completed} onChange={this.onToggleCompleted} type="checkbox" />
+				</td>
+				<td>
+					<select value={this.state.priority} onChange={this.onPriorityChange}>
+						<option value="HIGH">High</option>
+						<option value="MEDIUM">Medium</option>
+						<option value="LOW">Low</option>
+					</select>
+				</td>
+				<td>
+					<form onSubmit={this.onSave}>
+						<div className="form-group">
+							<input value={this.state.description} onChange={e => {this.setState({description: e.target.value});}} type="text" className="form-control"/>
+						</div>
+						<input value="Save" type="submit" className="btn btn-primary"/>
+						<input value="Cancel" onClick={this.disableEdit} type="button" className="btn btn-default"/>
+					</form>
+				</td>
+			</tr>
+			
 		);
 	},
 	render: function() {
@@ -115,12 +144,28 @@ var TaskList = React.createClass({
 	render: function() {
 		return (
 			<div>
-				<h1>{this.state.taskList.title}</h1>
-				<ul>{this.state.tasks.map(task =>
-					<li key={task._links.self.href}>
-						<Task data={task} onSubmit={this.props.onSubmit} onDelete={this.props.onDelete} />
-					</li>
-				)}</ul>
+				<h1>Task List: {this.state.taskList.title}</h1>
+				<table className="table table-hover">
+					<thead>
+						<tr>
+							<th className="actionColumn">
+								
+							</th>
+							<th className="checkboxColumn">
+								Finished
+							</th>
+							<th className="priorityColumn">
+								Priority
+							</th>
+							<th className="descriptionColumn">
+								Description
+							</th>
+						</tr>
+					</thead>
+					<tbody>{this.state.tasks.map(task =>
+						<Task data={task} onSubmit={this.props.onSubmit} onDelete={this.props.onDelete} key={task._links.self.href} />
+					)}</tbody>
+				</table>
 			</div>
 		);
 	}
@@ -142,10 +187,10 @@ var TaskListController = React.createClass({
 	},
 	render: function() {
 		return (
-			<div>
+			<div className="container">
 				<common.Menu />
-				<NewTask onSubmit={this.newTask} ref={newTask => {this.newTaskComponent = newTask}}/>
 				<TaskList onSubmit={this.updateTask} onDelete={this.deleteTask} ref={taskList => {this.taskListComponent = taskList;}}/>
+				<NewTask onSubmit={this.newTask} ref={newTask => {this.newTaskComponent = newTask}}/>
 			</div>
 		);
 	}

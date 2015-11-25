@@ -19,8 +19,11 @@ var NewTaskList = React.createClass({
 	render: function() {
 		return (
 			<form onSubmit={e => {e.preventDefault(); this.props.onSubmit({title: this.title});}}>
-				<input type="text" onChange={e => {this.title = e.target.value}} />
-				<input type="submit" value="Create new task list"/>
+				<div className="form-group">
+					<label htmlFor="newTaskListTitle">New task list title</label>
+					<input id="newTaskListTitle" type="text" onChange={e => {this.title = e.target.value}} className="form-control" />
+				</div>
+				<input type="submit" value="Create new task list" className="btn btn-primary" />
 			</form>
 		);
 	}
@@ -32,9 +35,11 @@ var TaskLists = React.createClass({
 	},
 	render: function() {
 		return (
-			<ul>{this.state.taskLists.map(taskList => 
-				<li key={taskList._links.taskList.href}>
-					<a href={"task-list.html?"+common.taskListParamName+"="+taskList._links.taskList.href}>{taskList.title}</a>
+			<ul className="list-group">{this.state.taskLists.map(taskList => 
+				<li className="list-group-item" key={taskList._links.taskList.href}>
+					<h3>
+						<a href={"task-list.html?"+common.taskListParamName+"="+taskList._links.taskList.href}>{taskList.title}</a>
+					</h3>
 				</li>
 			)}</ul>
 		);
@@ -47,10 +52,11 @@ var TaskListsController = React.createClass({
 	},
 	render: function() {
 		return (
-			<div>
+			<div className="container">
 				<common.Menu />
-				<NewTaskList onSubmit={taskList => {this.props.model.newTaskList.formSubmissions.onNext(taskList);}} />
+				<h1>All task lists</h1>
 				<TaskLists ref={taskLists => {this.taskListsComponent = taskLists;}} />
+				<NewTaskList onSubmit={taskList => {this.props.model.newTaskList.formSubmissions.onNext(taskList);}} />
 			</div>
 		);
 	}
