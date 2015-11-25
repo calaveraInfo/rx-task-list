@@ -11,23 +11,23 @@ taskListModel.task.updateConfirmations = Rx.Observable.merge(
 	taskListModel.task.deletes
 		.flatMap(deleteUrl => Rx.Observable.fromPromise(common.doDelete(deleteUrl))));
 
-taskListModel.newTask.confirmations = taskListModel.newTask.formSubmissions
-	.withLatestFrom(
-		Rx.Observable.just(common.api)
-			.flatMap(apiUrl => Rx.Observable.fromPromise(jQuery.get(apiUrl)))
-			.map(apiHal => apiHal._links.tasks.href),
-		(entity, url) => ({entity: entity, url: url}))
-	.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity)));
-
 taskListModel.taskList = Rx.Observable.just(common.getURLParameter(common.taskListParamName))
 	.combineLatest(
-		taskListModel.newTask.confirmations.startWith("whatever"),
 		taskListModel.task.updateConfirmations.startWith("whatever"),
 		url => url)
 	.flatMap(taskListUri => Rx.Observable.fromPromise(jQuery.get(taskListUri)))
-	.flatMap(taskList => Rx.Observable.fromPromise(jQuery.get(taskList._links.tasks.href)),
-		(taskList, tasks) => ({taskList: taskList, tasks: tasks._embedded.tasks.sort(
-			(t1, t2) => t1.description.localeCompare(t2.description))}));
+	.flatMap(taskList => Rx.Observable.fromPromise(jQuery.get(taskList._links.tasks.href))
+		.map(tasks => tasks._embedded.tasks)
+		.merge(taskListModel.newTask.formSubmissions
+			.withLatestFrom(
+				Rx.Observable.just(common.api)
+					.flatMap(apiUrl => Rx.Observable.fromPromise(jQuery.get(apiUrl)))
+					.map(apiHal => apiHal._links.tasks.href),
+				(entity, url) => ({entity: entity, url: url}))
+			.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity))))
+		.scan((previous, current) => Array.isArray(current) ? current : previous.concat(current)),
+		(taskList, tasks) => ({taskList: taskList, tasks: tasks
+			.sort((t1, t2) => t1.description.localeCompare(t2.description))}));
 
 var NewTask = React.createClass({
 	render: function() {
