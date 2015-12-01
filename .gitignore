@@ -5,6 +5,7 @@
 target/
 node_modules/
 generated-bundle/
+node-executable/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
