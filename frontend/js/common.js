@@ -1,4 +1,5 @@
 var React = require('react');
+var jQuery = require('jquery');
 
 module.exports.api = "/api/";
 module.exports.taskListParamName = "taskList";

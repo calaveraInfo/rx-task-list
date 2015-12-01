@@ -193,7 +193,7 @@ var TaskListController = React.createClass({
 	}
 });
 
-React.render(
+ReactDOM.render(
 	<TaskListController model={taskListModel} />,
 	document.getElementById("app")
 );
