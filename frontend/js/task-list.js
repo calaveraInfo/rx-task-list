@@ -5,36 +5,35 @@ var Rx = require('rx');
 var jQuery = require('jquery');
 
 var taskListModel = {};
-taskListModel.newTask = {};
-taskListModel.newTask.formSubmissions = new Rx.Subject();
-taskListModel.task = {};
-taskListModel.task.updates = new Rx.Subject();
-taskListModel.task.deletes = new Rx.Subject();
+taskListModel.newTasks= new Rx.Subject();
+taskListModel.taskUpdates = new Rx.Subject();
+taskListModel.taskDeletes = new Rx.Subject();
+taskListModel.taskList = new Rx.Subject();
 
-taskListModel.taskList = Rx.Observable.just(common.getURLParameter(common.taskListParamName))
+Rx.Observable.just(common.getURLParameter(common.taskListParamName))
 	.flatMap(taskListUri => Rx.Observable.fromPromise(jQuery.get(taskListUri)))
 	.flatMap(taskList => Rx.Observable.fromPromise(jQuery.get(taskList._links.tasks.href))
 		.map(tasks => tasks._embedded.tasks)
-		.merge(taskListModel.newTask.formSubmissions
+		.merge(taskListModel.newTasks
 			.withLatestFrom(
 				Rx.Observable.just(common.api)
 					.flatMap(apiUrl => Rx.Observable.fromPromise(jQuery.get(apiUrl)))
 					.map(apiHal => apiHal._links.tasks.href),
 				(entity, url) => ({entity: entity, url: url}))
-			.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity)))
-			.map(newTask => ({task: newTask, isNew: true})))
-		.merge(taskListModel.task.updates
-			.flatMap(taskUpdate => Rx.Observable.fromPromise(common.doPut(taskUpdate.url, taskUpdate.entity)))
-			.map(updatedTask => ({task: updatedTask, isUpdated: true})))
-		.merge(taskListModel.task.deletes
-			.flatMap(deleteUrl => Rx.Observable.fromPromise(common.doDelete(deleteUrl)), deleteUrl => deleteUrl)
-			.map(deleteUrl => ({task: deleteUrl, isDeleted: true})))
-		.scan((previous, current) => jQuery.isArray(current) ? current :
-			current.isNew ? previous.concat(current.task) :
-			current.isUpdated ? previous.map(oldTask => oldTask._links.self.href == current.task._links.self.href ? current.task : oldTask) :
-			current.isDeleted ? previous.filter(task => task._links.self.href != current.task) : []),
+			.flatMap(submission => Rx.Observable.fromPromise(common.doPost(submission.url, submission.entity))))
+		.withLatestFrom(taskListModel.taskList.startWith([]), (current, previous) => jQuery.isArray(current) ? current :
+			previous.tasks.concat(current))
+		.merge(taskListModel.taskUpdates
+			.flatMap(taskUpdate => Rx.Observable.fromPromise(common.doPut(taskUpdate.url, taskUpdate.entity))))
+		.withLatestFrom(taskListModel.taskList.startWith([]), (current, previous) => jQuery.isArray(current) ? current : 
+			previous.tasks.map(oldTask => oldTask._links.self.href == current._links.self.href ? current : oldTask))
+		.merge(taskListModel.taskDeletes
+			.flatMap(deleteUrl => Rx.Observable.fromPromise(common.doDelete(deleteUrl)), deleteUrl => deleteUrl))
+		.withLatestFrom(taskListModel.taskList.startWith([]), (current, previous) => jQuery.isArray(current) ? current : 
+			previous.tasks.filter(task => task._links.self.href != current)),
 		(taskList, tasks) => ({taskList: taskList, tasks: tasks
-			.sort((t1, t2) => t1.description.localeCompare(t2.description))}));
+			.sort((t1, t2) => t1.description.localeCompare(t2.description))}))
+	.subscribe(taskListModel.taskList);
 
 var NewTask = React.createClass({
 	render: function() {
@@ -154,18 +153,10 @@ var TaskList = React.createClass({
 				<table className="table table-hover">
 					<thead>
 						<tr>
-							<th className="actionColumn">
-								
-							</th>
-							<th className="checkboxColumn">
-								Finished
-							</th>
-							<th className="priorityColumn">
-								Priority
-							</th>
-							<th className="descriptionColumn">
-								Description
-							</th>
+							<th className="actionColumn"></th>
+							<th className="checkboxColumn">Finished</th>
+							<th className="priorityColumn">Priority</th>
+							<th className="descriptionColumn">Description</th>
 						</tr>
 					</thead>
 					<tbody>{this.state.tasks.map(task =>
@@ -183,13 +174,13 @@ var TaskListController = React.createClass({
 	},
 	newTask: function(task) {
 		task.taskList = this.taskListComponent.state.taskList._links.self.href;
-		this.props.model.newTask.formSubmissions.onNext(task);
+		this.props.model.newTasks.onNext(task);
 	},
 	updateTask: function(task, id) {
-		this.props.model.task.updates.onNext({entity: task, url: id});
+		this.props.model.taskUpdates.onNext({entity: task, url: id});
 	},
 	deleteTask: function(id) {
-		this.props.model.task.deletes.onNext(id)
+		this.props.model.taskDeletes.onNext(id)
 	},
 	render: function() {
 		return (
