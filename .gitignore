@@ -4,6 +4,7 @@
 .settings/
 target/
 node_modules/
+generated-bundle/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

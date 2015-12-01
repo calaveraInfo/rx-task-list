@@ -1,6 +1,8 @@
-// browserify -t [ babelify --presets [ react es2015 ] ] index-require.js -o bundle.js
-//var React = require('react');
-//var ReactDOM = require('react-dom');
+var React = require('react');
+var common = require('./common.js');
+var ReactDOM = require('react-dom');
+var Rx = require('rx');
+var jQuery = require('jquery');
 
 var taskListsModel = {};
 taskListsModel.newTaskList = {};
@@ -66,7 +68,7 @@ var TaskListsController = React.createClass({
 	}
 });
  
-React.render(
+ReactDOM.render(
 	<TaskListsController model={taskListsModel} />,
 	document.getElementById("app")
 );

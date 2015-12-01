@@ -1,3 +1,9 @@
+var React = require('react');
+var common = require('./common.js');
+var ReactDOM = require('react-dom');
+var Rx = require('rx');
+var jQuery = require('jquery');
+
 var taskListModel = {};
 taskListModel.newTask = {};
 taskListModel.newTask.formSubmissions = new Rx.Subject();

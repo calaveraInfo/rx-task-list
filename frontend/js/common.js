@@ -1,34 +1,33 @@
-window.common = window.common || {};
+var React = require('react');
 
-(function (ns) {
-	ns.api = "/api/";
-	ns.taskListParamName = "taskList";
-	ns.doPost = function (url, data) {
-		return jQuery.ajax({
-			type: "POST",
-			url: url,
-			data: JSON.stringify(data),
-			contentType: 'application/json'
-		});
-	};
-	ns.doPut = function (url, data) {
-		return jQuery.ajax({
-			type: "PUT",
-			url: url,
-			data: JSON.stringify(data),
-			contentType: 'application/json'
-		});
-	};
-	ns.doDelete = function (url) {
-		return jQuery.ajax({
-			type: "DELETE",
-			url: url
-		});
-	};
-	ns.getURLParameter = function(name) {
-	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
-	};
-	ns.Menu = React.createClass({
+module.exports.api = "/api/";
+module.exports.taskListParamName = "taskList";
+module.exports.doPost = function (url, data) {
+	return jQuery.ajax({
+		type: "POST",
+		url: url,
+		data: JSON.stringify(data),
+		contentType: 'application/json'
+	});
+};
+module.exports.doPut = function (url, data) {
+	return jQuery.ajax({
+		type: "PUT",
+		url: url,
+		data: JSON.stringify(data),
+		contentType: 'application/json'
+	});
+};
+module.exports.doDelete = function (url) {
+	return jQuery.ajax({
+		type: "DELETE",
+		url: url
+	});
+};
+module.exports.getURLParameter = function(name) {
+  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+};
+module.exports.Menu = React.createClass({
 		render: function() {
 			return (
 				<nav className="navbar navbar-inverse navbar-fixed-top">
@@ -57,4 +56,3 @@ window.common = window.common || {};
 			);
 		}
 	});
-})(window.common); 
