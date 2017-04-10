@@ -6,17 +6,17 @@ Task lists management application serving as a technology showcase. Involved tec
 * RxJs
 * React JS
 
-#Usage
-##Requirements:
+# Usage
+## Requirements:
 
 * Java 7
 * Maven 3
 
-##Building
+## Building
 mvn package
 
-##Running
+## Running
 java -jar target/rx-task-list-1.0.0-SNAPSHOT.jar
 
-##Using
+## Using
 http://localhost:8080/
